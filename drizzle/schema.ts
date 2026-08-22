@@ -125,6 +125,10 @@ export const sharedEditorSounds = mysqlTable("sharedEditorSounds", {
   title: varchar("title", { length: 160 }).notNull(),
   description: varchar("description", { length: 500 }).notNull(),
   category: varchar("category", { length: 64 }).notNull(),
+  moods: varchar("moods", { length: 160 }).notNull().default(""),
+  licenseType: varchar("licenseType", { length: 64 }).notNull().default("creator-owned"),
+  creditLine: varchar("creditLine", { length: 300 }).notNull().default(""),
+  sourceUrl: varchar("sourceUrl", { length: 500 }).notNull().default(""),
   storageKey: varchar("storageKey", { length: 500 }).notNull(),
   originalName: varchar("originalName", { length: 255 }).notNull(),
   mimeType: varchar("mimeType", { length: 128 }).notNull(),
@@ -169,7 +173,32 @@ export const sharedResourceReviews = mysqlTable("sharedResourceReviews", {
   index("shared_resource_reviews_resource_idx").on(table.resourceType, table.resourceId, table.updatedAt),
 ]);
 
+/**
+ * Authenticated reports against published shared resources. `activeKey` is
+ * unique only while a report is open, allowing a reporter to submit a new
+ * report after an earlier one is resolved without duplicating active cases.
+ */
+export const sharedResourceReports = mysqlTable("sharedResourceReports", {
+  id: int("id").autoincrement().primaryKey(),
+  reporterId: int("reporterId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  resourceType: mysqlEnum("resourceType", ["template", "video", "sound"]).notNull(),
+  resourceId: int("resourceId").notNull(),
+  reason: mysqlEnum("reason", ["rights", "copyright", "harassment", "spam", "other"]).notNull(),
+  details: varchar("details", { length: 600 }).notNull().default(""),
+  status: mysqlEnum("status", ["open", "resolved", "dismissed"]).notNull().default("open"),
+  activeKey: varchar("activeKey", { length: 200 }),
+  moderatorId: int("moderatorId").references(() => users.id, { onDelete: "set null" }),
+  moderatorNote: varchar("moderatorNote", { length: 500 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, table => [
+  uniqueIndex("shared_resource_reports_active_uq").on(table.activeKey),
+  index("shared_resource_reports_status_updated_idx").on(table.status, table.updatedAt),
+  index("shared_resource_reports_reporter_idx").on(table.reporterId, table.createdAt),
+]);
+
 export type SharedEditorTemplate = typeof sharedEditorTemplates.$inferSelect;
 export type SharedEditorVideo = typeof sharedEditorVideos.$inferSelect;
 export type SharedEditorSound = typeof sharedEditorSounds.$inferSelect;
 export type SharedResourceReview = typeof sharedResourceReviews.$inferSelect;
+export type SharedResourceReport = typeof sharedResourceReports.$inferSelect;

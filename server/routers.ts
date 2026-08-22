@@ -1,10 +1,11 @@
 import { COOKIE_NAME } from "@shared/const";
 import { z } from "zod";
-import { deleteResourceReview, getEditorProject, getPublishedEditorTemplate, listEditorProjects, listFavoriteSoundIds, listFavoriteTemplateIds, listPublishedEditorSounds, listPublishedEditorTemplates, listPublishedEditorVideos, listResourceReviews, publishEditorSound, publishEditorTemplate, publishEditorVideo, saveEditorProject, saveResourceReview, toggleFavoriteEditorSound, toggleFavoriteEditorTemplate } from "./db";
+import { createSharedResourceReport, deleteResourceReview, getEditorProject, getPublishedEditorTemplate, listEditorProjects, listFavoriteSoundIds, listFavoriteTemplateIds, listMySharedResourceReports, listOpenSharedResourceReports, listPublishedEditorSounds, listPublishedEditorTemplates, listPublishedEditorVideos, listResourceReviews, publishEditorSound, publishEditorTemplate, publishEditorVideo, resolveSharedResourceReport, saveEditorProject, saveResourceReview, toggleFavoriteEditorSound, toggleFavoriteEditorTemplate } from "./db";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { ENV } from "./_core/env";
 import { storageGet, storagePut } from "./storage";
 import { systemRouter } from "./_core/systemRouter";
-import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -111,6 +112,10 @@ export const appRouter = router({
         title: z.string().trim().min(3).max(160),
         description: z.string().trim().min(10).max(500),
         category: z.string().trim().min(2).max(64),
+        moods: z.string().trim().max(160),
+        licenseType: z.enum(["creator-owned", "public-domain", "royalty-free", "permission"]),
+        creditLine: z.string().trim().max(300),
+        sourceUrl: z.string().trim().max(500).refine(value => !value || /^https:\/\//i.test(value), "Use an https source link or leave it blank."),
         originalName: z.string().trim().min(1).max(255),
         mimeType: z.enum(["audio/mpeg", "audio/mp4", "audio/wav", "audio/ogg", "audio/webm"]),
         base64: z.string().min(16).max(16_777_216),
@@ -130,6 +135,10 @@ export const appRouter = router({
           title: input.title,
           description: input.description,
           category: input.category,
+          moods: input.moods,
+          licenseType: input.licenseType,
+          creditLine: input.creditLine,
+          sourceUrl: input.sourceUrl,
           storageKey: stored.key,
           originalName: input.originalName,
           mimeType: input.mimeType,
@@ -151,6 +160,23 @@ export const appRouter = router({
     deleteReview: protectedProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(({ ctx, input }) => deleteResourceReview(ctx.user.id, input.id)),
+    createReport: protectedProcedure
+      .input(z.object({
+        resourceType: z.enum(["template", "video", "sound"]),
+        resourceId: z.number().int().positive(),
+        reason: z.enum(["rights", "copyright", "harassment", "spam", "other"]),
+        details: z.string().trim().max(600),
+      }))
+      .mutation(({ ctx, input }) => createSharedResourceReport({ ...input, reporterId: ctx.user.id })),
+    myReports: protectedProcedure.query(({ ctx }) => listMySharedResourceReports(ctx.user.id)),
+    moderationQueue: adminProcedure.query(() => listOpenSharedResourceReports()),
+    resolveReport: adminProcedure
+      .input(z.object({
+        id: z.number().int().positive(),
+        status: z.enum(["resolved", "dismissed"]),
+        moderatorNote: z.string().trim().max(500),
+      }))
+      .mutation(({ ctx, input }) => resolveSharedResourceReport({ ...input, moderatorId: ctx.user.id })),
   }),
   movieDiscovery: router({
     search: publicProcedure
@@ -169,6 +195,45 @@ export const appRouter = router({
           storeUrl: typeof item.trackViewUrl === "string" ? item.trackViewUrl : "",
           previewUrl: typeof item.previewUrl === "string" ? item.previewUrl : "",
         })).filter(item => item.id > 0);
+      }),
+  }),
+  musicDiscovery: router({
+    status: publicProcedure.query(() => ({
+      provider: "Jamendo",
+      configured: Boolean(ENV.jamendoClientId.trim()),
+      mode: "metadata-only" as const,
+    })),
+    search: publicProcedure
+      .input(z.object({ query: z.string().trim().min(2).max(120) }))
+      .query(async ({ input }) => {
+        const clientId = ENV.jamendoClientId.trim();
+        if (!clientId) {
+          throw new Error("Jamendo discovery is not configured for this deployment. Add a server-side Jamendo app client ID to enable metadata search.");
+        }
+
+        const params = new URLSearchParams({
+          client_id: clientId,
+          format: "json",
+          limit: "8",
+          namesearch: input.query,
+          include: "musicinfo",
+        });
+        const response = await fetch(`https://api.jamendo.com/v3.0/tracks/?${params.toString()}`, {
+          signal: AbortSignal.timeout(8_000),
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok) throw new Error("Jamendo discovery is temporarily unavailable. Try again shortly.");
+
+        const payload = await response.json() as { results?: Array<Record<string, unknown>> };
+        return (payload.results ?? []).map(item => ({
+          id: typeof item.id === "string" || typeof item.id === "number" ? String(item.id) : "",
+          title: typeof item.name === "string" ? item.name : "Untitled track",
+          artist: typeof item.artist_name === "string" ? item.artist_name : "Unknown artist",
+          durationSeconds: typeof item.duration === "number" && Number.isFinite(item.duration) ? Math.max(0, Math.round(item.duration)) : 0,
+          artworkUrl: typeof item.image === "string" ? item.image : "",
+          sourceUrl: typeof item.shareurl === "string" ? item.shareurl : "",
+          licenseUrl: typeof item.license_ccurl === "string" ? item.license_ccurl : "",
+        })).filter(item => Boolean(item.id && item.sourceUrl));
       }),
   }),
 });

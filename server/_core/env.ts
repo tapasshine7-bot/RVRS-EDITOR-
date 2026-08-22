@@ -7,4 +7,7 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  // Optional. This stays server-side and is only used for Jamendo catalogue
+  // metadata discovery; the application never proxies or stores catalogue audio.
+  jamendoClientId: process.env.JAMENDO_CLIENT_ID ?? "",
 };

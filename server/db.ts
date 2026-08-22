@@ -1,6 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { editorProjects, InsertUser, sharedEditorSounds, sharedEditorTemplates, sharedEditorVideos, sharedResourceReviews, sharedSoundFavorites, sharedTemplateFavorites, users } from "../drizzle/schema";
+import { editorProjects, InsertUser, sharedEditorSounds, sharedEditorTemplates, sharedEditorVideos, sharedResourceReports, sharedResourceReviews, sharedSoundFavorites, sharedTemplateFavorites, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -259,6 +259,10 @@ export async function listPublishedEditorSounds() {
       title: sharedEditorSounds.title,
       description: sharedEditorSounds.description,
       category: sharedEditorSounds.category,
+      moods: sharedEditorSounds.moods,
+      licenseType: sharedEditorSounds.licenseType,
+      creditLine: sharedEditorSounds.creditLine,
+      sourceUrl: sharedEditorSounds.sourceUrl,
       storageKey: sharedEditorSounds.storageKey,
       originalName: sharedEditorSounds.originalName,
       mimeType: sharedEditorSounds.mimeType,
@@ -279,6 +283,10 @@ export async function publishEditorSound(input: {
   title: string;
   description: string;
   category: string;
+  moods: string;
+  licenseType: string;
+  creditLine: string;
+  sourceUrl: string;
   storageKey: string;
   originalName: string;
   mimeType: string;
@@ -332,6 +340,8 @@ export async function toggleFavoriteEditorSound(userId: number, soundId: number)
 }
 
 export type SharedResourceType = "template" | "video" | "sound";
+export type SharedReportReason = "rights" | "copyright" | "harassment" | "spam" | "other";
+export type SharedReportResolution = "resolved" | "dismissed";
 
 async function getPublishedResourceCreator(resourceType: SharedResourceType, resourceId: number) {
   const db = await getDb();
@@ -343,6 +353,78 @@ async function getPublishedResourceCreator(resourceType: SharedResourceType, res
     .where(and(eq(table.id, resourceId), eq(table.status, "published")))
     .limit(1);
   return result[0]?.creatorId ?? null;
+}
+
+export async function createSharedResourceReport(input: {
+  reporterId: number;
+  resourceType: SharedResourceType;
+  resourceId: number;
+  reason: SharedReportReason;
+  details: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Reporting is temporarily unavailable.");
+  const creatorId = await getPublishedResourceCreator(input.resourceType, input.resourceId);
+  if (!creatorId) throw new Error("This shared resource is unavailable.");
+  if (creatorId === input.reporterId) throw new Error("Creators cannot report their own resource.");
+  const activeKey = `open:${input.reporterId}:${input.resourceType}:${input.resourceId}`;
+  const existing = await db.select({ id: sharedResourceReports.id })
+    .from(sharedResourceReports)
+    .where(eq(sharedResourceReports.activeKey, activeKey))
+    .limit(1);
+  if (existing[0]) throw new Error("You already have an open report for this resource.");
+  const result = await db.insert(sharedResourceReports).values({ ...input, activeKey, status: "open" });
+  return { id: Number((result as unknown as { insertId?: number }).insertId ?? 0), status: "open" as const };
+}
+
+export async function listMySharedResourceReports(reporterId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: sharedResourceReports.id,
+    resourceType: sharedResourceReports.resourceType,
+    resourceId: sharedResourceReports.resourceId,
+    reason: sharedResourceReports.reason,
+    details: sharedResourceReports.details,
+    status: sharedResourceReports.status,
+    moderatorNote: sharedResourceReports.moderatorNote,
+    createdAt: sharedResourceReports.createdAt,
+    updatedAt: sharedResourceReports.updatedAt,
+  }).from(sharedResourceReports).where(eq(sharedResourceReports.reporterId, reporterId)).orderBy(desc(sharedResourceReports.updatedAt));
+}
+
+export async function listOpenSharedResourceReports() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: sharedResourceReports.id,
+    reporterId: sharedResourceReports.reporterId,
+    reporterName: users.name,
+    resourceType: sharedResourceReports.resourceType,
+    resourceId: sharedResourceReports.resourceId,
+    reason: sharedResourceReports.reason,
+    details: sharedResourceReports.details,
+    status: sharedResourceReports.status,
+    createdAt: sharedResourceReports.createdAt,
+  }).from(sharedResourceReports).leftJoin(users, eq(sharedResourceReports.reporterId, users.id))
+    .where(eq(sharedResourceReports.status, "open")).orderBy(desc(sharedResourceReports.createdAt)).limit(100);
+}
+
+export async function resolveSharedResourceReport(input: {
+  id: number;
+  moderatorId: number;
+  status: SharedReportResolution;
+  moderatorNote: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Moderation is temporarily unavailable.");
+  const result = await db.update(sharedResourceReports).set({
+    status: input.status,
+    moderatorId: input.moderatorId,
+    moderatorNote: input.moderatorNote || null,
+    activeKey: null,
+  }).where(and(eq(sharedResourceReports.id, input.id), eq(sharedResourceReports.status, "open")));
+  return { id: input.id, resolved: (result as unknown as { rowsAffected?: number }).rowsAffected !== 0 };
 }
 
 export async function getResourceRatingSummary(resourceType: SharedResourceType, resourceId: number) {

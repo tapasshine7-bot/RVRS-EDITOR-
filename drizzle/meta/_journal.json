@@ -36,6 +36,20 @@
       "when": 1787381190132,
       "tag": "0004_sudden_echo",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1787382149603,
+      "tag": "0005_equal_jack_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1787388716880,
+      "tag": "0006_sudden_alex_power",
+      "breakpoints": true
     }
   ]
 }

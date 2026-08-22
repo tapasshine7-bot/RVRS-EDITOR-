@@ -56,3 +56,18 @@
 - [x] Add clear dashboard project statistics and a one-click new-project workflow from the filtered project view.
 - [x] Preserve accessible empty, no-match, and mobile layouts for the new project finder.
 - [x] Add focused tests and responsive verification for the creator productivity upgrade, then checkpoint and push it to GitHub.
+- [x] Add an optional Jamendo music-discovery adapter that returns rights-aware metadata only and never stores or proxies commercial catalog audio.
+- [x] Add a secure Jamendo application credential configuration path and a clear no-credential fallback in the Sound Library.
+- [x] Add authenticated creator reports for shared templates, videos, and sounds, with a single active report per reporter and resource.
+- [x] Add an owner-only moderation queue to resolve reports without fabricating community data.
+- [x] Add browser-side export preparation with non-autoplay progress, cancellation, supported format guidance, and transparent 4K limitations.
+- [x] Add tests and desktop/mobile validation for music discovery, reporting, moderation, and export progress before checkpointing and pushing the release.
+- [x] Research publicly documented, authorized Free Fire top-up and reseller/API options only; do not test payments, use player accounts, or build an unauthorized diamond-delivery flow.
+- [x] Keep the current release focused on REVRSE EDITOR; do not add any game diamond-top-up, payment, or reseller functionality.
+- [x] Improve the optional Jamendo metadata discovery experience with clear mood, duration, licence, and provider-link guidance while retaining the no-download/no-autoplay boundary.
+- [ ] Identify the exact Apollo Music provider and verify its API, commercial-use, download, and redistribution permissions before considering any integration.
+- [ ] Complete and verify the end-to-end first-party Sound Library catalogue experience for creator-owned, public-domain, royalty-free, and written-permission sounds, including browse, filter, empty/error, mobile, and use-in-edit flows.
+- [x] Verify Feed.fm, Mubert, and Soundstripe Enterprise directly against their official API, licensing, partnership, pricing, and end-user-rights documentation before selecting any provider.
+- [x] Establish current metadata-only/no-standalone-download guardrails: no provider audio is previewed, downloaded, proxied, or persisted until a licensed provider agreement and credentials are available.
+- [ ] After an authorized provider agreement and credentials are available, implement and test provider-permitted in-editor preview and project selection without standalone downloads or forbidden persistence.
+- [x] Extract and test the browser export-preparation capability and progress state model without introducing a final-video encoder claim.

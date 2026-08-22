@@ -34,6 +34,10 @@ describe("templateStudio validation", () => {
       title: "Licensed ambience",
       description: "Creator-owned ambience cleared for editing use.",
       category: "Ambient",
+      moods: "calm, atmospheric",
+      licenseType: "creator-owned" as const,
+      creditLine: "",
+      sourceUrl: "",
       originalName: "ambience.mp3",
       mimeType: "audio/mpeg",
       base64: "Y3JlYXRvci1vd25lZC1saWNlbnNlZC1hdWRpbw==",
@@ -44,6 +48,28 @@ describe("templateStudio validation", () => {
 
     await expect(caller.templateStudio.publishSound(input)).rejects.toThrow();
     await expect(caller.templateStudio.publishSound({ ...input, rightsAttested: true, mimeType: "audio/flac" })).rejects.toThrow();
+  });
+
+  it("accepts only stated lawful licence categories and https source links for shared sounds", async () => {
+    const caller = appRouter.createCaller(context(signedInUser));
+    const input = {
+      title: "Licensed ambience",
+      description: "Creator-owned ambience cleared for editing use.",
+      category: "Ambient",
+      moods: "calm",
+      licenseType: "not-confirmed",
+      creditLine: "",
+      sourceUrl: "",
+      originalName: "ambience.mp3",
+      mimeType: "audio/mpeg",
+      base64: "Y3JlYXRvci1vd25lZC1saWNlbnNlZC1hdWRpbw==",
+      byteSize: 28,
+      durationMs: 1_200,
+      rightsAttested: true,
+    };
+
+    await expect(caller.templateStudio.publishSound(input as never)).rejects.toThrow();
+    await expect(caller.templateStudio.publishSound({ ...input, licenseType: "creator-owned", sourceUrl: "http://not-secure.example/license" })).rejects.toThrow(/https/i);
   });
 
   it("keeps real community reviews within one-to-five stars and the supported resource types", async () => {
