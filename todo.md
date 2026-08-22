@@ -1,0 +1,54 @@
+# REVRSE EDITOR TODO
+
+- [x] Analyse the VYRA EDIT brief and upgrade the workspace to full-stack infrastructure.
+- [x] Rename all user-visible VYRA EDIT branding to REVRSE EDITOR and migrate browser-local identifiers without losing safe legacy recovery.
+- [x] Expand the local-first project model with prompt-required multi-track editing, transitions, effects, markers, search, and version-ready data.
+- [x] Build working REVRSE EDITOR workspace workflows for media, preview, timeline, inspector, captions, templates, and command controls.
+- [x] Add reliable project-management and safe persistence interfaces with transparent local-processing fallbacks.
+- [x] Wire authenticated REVRSE EDITOR project save, load, and list flows to the existing typed server procedures without replacing local-first autosave.
+- [x] Add explicit server-sync loading, empty, and error feedback while preserving local JSON backup recovery.
+- [x] Re-test desktop and mobile editor behavior, accessibility, error states, TypeScript, and Vitest coverage before release.
+- [x] Manually test REVRSE EDITOR keyboard navigation, focus visibility, command access, timeline and inspector reachability, plus mobile panel open and close behavior.
+- [x] Exercise and document invalid project JSON, unreadable project file, invalid SRT, locked caption-track, and unavailable account-sync error states.
+- [x] Exercise a distinct unreadable project-file import through the REVRSE EDITOR UI and record the exact fallback message.
+- [x] Trigger the REVRSE EDITOR account-sync unavailable UI state and confirm browser-local editing remains available.
+- [x] Document the signed-in account-sync outage verification limitation and retain the observed real UI fallback message.
+- [x] In the active unavailable-sync preview state, continue a browser-local edit and verify that local autosave remains usable.
+- [x] Reconfirm the signed-in outage verification limitation and exact fallback message are present in the saved release notes.
+- [x] In one uninterrupted transient unavailable-sync test, use the real project-title input and confirm the resulting update reaches browser-local autosave before any redirect.
+- [x] Add a copyright-respecting Movie Dialogue Workspace entry point with clear user-owned or licensed-media rules.
+- [x] Build movie-title discovery and legal-source-link selection without downloading or re-hosting movies.
+- [x] Add dialogue/caption search, editable transcript rows, and direct permitted-caption insertion into the active REVRSE project.
+- [x] Test the Movie Dialogue Workspace on desktop and mobile, then save a new checkpoint.
+- [x] Add 4K landscape, vertical, square, and high-resolution custom canvas support with browser-performance guidance.
+- [x] Verify 4K canvas presets and mobile-scaled preview behavior before the updated release checkpoint.
+- [x] Add a Template Studio dashboard for browsing, saving, and favouriting original editable templates.
+- [x] Add authenticated original-template publishing with title, category, project structure, and rights attestation.
+- [x] Add safe server procedures and database schema for shared template records and per-user favourites.
+- [x] Validate Template Studio publishing inputs, favourite forwarding, account-gated empty states, and local fallback behavior without seeding templates.
+- [x] Add licensed reusable-video publishing, S3 media references, and user ownership confirmation to Template Studio.
+- [x] Add shared-video browsing and “use in this edit” actions that insert selected licensed assets into a user’s local project.
+- [x] Validate shared-video publication contracts plus browser-visible empty and account-gated fallback states without seeding shared media.
+- [x] Add authenticated one-review-per-user star ratings and written reviews for shared videos and templates, without sample or fabricated feedback.
+- [x] Add aggregate rating summaries, reviewer ownership controls, and safe validation for real community feedback.
+- [x] Validate rating input bounds, supported resource types, and empty/account-gated feedback without generating fabricated ratings or reviews.
+- [x] Apply an original REVRSE EDITOR product language across the new creator workflows rather than reproducing another editor’s visual hierarchy or copy.
+- [x] Validate the new workflows as responsive, locally recoverable, and clearly differentiated from generic editing dashboards.
+- [x] Add an original Sound Library workflow for creator-uploaded, licensed, royalty-free, or user-owned music, dialogue, and meme clips without hosting copied commercial catalogues.
+- [x] Add sound-resource search, favourites, legal-source information, and permitted use-in-edit controls with clear licensing prompts.
+- [x] Validate sound upload and saved-sound contracts, the no-autoplay empty state, licensing prompts, and account-gated fallback without seeding sound records.
+- [x] Add visible rights-attested publishing forms for original templates and reusable licensed videos in Creator Studio.
+- [x] Add legal source guidance and caption-row navigation to Movie Dialogue Workspace.
+- [x] Finish Movie Dialogue transcript-row editing with jump/select actions and live-workspace validation.
+- [x] Expose custom high-resolution canvas width and height inputs with a 160–7680 clamp and device-performance guidance.
+- [x] Test the custom high-resolution canvas settings UI on a phone-sized viewport and record that the width, height, guidance, and apply controls remain usable.
+- [x] Fix the mobile startup crash caused by missing or legacy browser-local editor state, then add a regression test for safe project normalization.
+- [x] Build the VYRA EDIT dashboard and local-first project model.
+- [x] Build the functional desktop editor shell with import, preview, and timeline controls.
+- [x] Implement safe browser-local editing operations, autosave, and undo/redo.
+- [x] Add inspector, text, captions, effects, templates, export, asset library, and accessibility interfaces.
+- [x] Define modular persisted-project schema and server procedures.
+- [x] Add focused Vitest coverage and test the major editor workflows.
+- [x] Verify desktop and mobile layouts and prepare the release checkpoint.
+- [x] Save the completed REVRSE EDITOR release checkpoint and push it to tapasshine7-bot/RVRS-EDITOR-.
+- [x] Add direct shared-template browsing and saved-template controls to the dashboard-level Creator Studio entry.
