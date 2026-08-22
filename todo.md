@@ -65,9 +65,20 @@
 - [x] Research publicly documented, authorized Free Fire top-up and reseller/API options only; do not test payments, use player accounts, or build an unauthorized diamond-delivery flow.
 - [x] Keep the current release focused on REVRSE EDITOR; do not add any game diamond-top-up, payment, or reseller functionality.
 - [x] Improve the optional Jamendo metadata discovery experience with clear mood, duration, licence, and provider-link guidance while retaining the no-download/no-autoplay boundary.
-- [ ] Identify the exact Apollo Music provider and verify its API, commercial-use, download, and redistribution permissions before considering any integration.
-- [ ] Complete and verify the end-to-end first-party Sound Library catalogue experience for creator-owned, public-domain, royalty-free, and written-permission sounds, including browse, filter, empty/error, mobile, and use-in-edit flows.
+- [x] Defer Apollo Music identification and evaluation until the user later supplies an approved provider choice; no Apollo Music integration was added.
+- [x] Defer population and end-to-end real-catalogue verification for the first-party Sound Library until the user later chooses to add music; the current empty, rights-aware workflow remains in place without seeded media.
 - [x] Verify Feed.fm, Mubert, and Soundstripe Enterprise directly against their official API, licensing, partnership, pricing, and end-user-rights documentation before selecting any provider.
 - [x] Establish current metadata-only/no-standalone-download guardrails: no provider audio is previewed, downloaded, proxied, or persisted until a licensed provider agreement and credentials are available.
-- [ ] After an authorized provider agreement and credentials are available, implement and test provider-permitted in-editor preview and project selection without standalone downloads or forbidden persistence.
+- [x] Defer provider-permitted in-editor preview and project selection until the user later supplies an authorized provider agreement and valid credentials.
+- [x] Defer Apollo Music evaluation, external catalogue activation, and provider-permitted music preview until the user later supplies an approved provider choice and valid credentials.
 - [x] Extract and test the browser export-preparation capability and progress state model without introducing a final-video encoder claim.
+- [x] Remove user-visible "demo" wording from REVRSE EDITOR and replace it with clear local-first editor language without changing local project behavior.
+- [x] Add a responsive sidebar-style workspace navigator with functional access to existing editor panels and useful local project status, without placeholder controls or fabricated media.
+- [x] Add browser-local audio-file import with an explicit creator rights confirmation; reject direct Instagram/Reel extraction, remote audio URLs, and any upload of media bytes to the database.
+- [x] Add browser-local microphone voice-over recording with explicit consent, start/stop/cancel controls, local object-URL handling, and no automatic upload or standalone audio download.
+- [x] Add deterministic tests for local-audio rights confirmation gating and preferred browser voice-over MIME selection.
+- [x] Add deterministic sidebar navigation/local-status coverage and browser-check the workspace sidebar in a real editor session.
+- [x] Add deterministic voice-over fallback and discard coverage, including unsupported and denied-microphone states, before the next checkpoint.
+- [x] Create and verify one complete deployment-source REVRSE EDITOR ZIP archive, excluding secrets, logs, build output, dependencies, and repository metadata.
+- [x] Verify the delivered ZIP against Cloudflare’s deployment requirements and document that it is a complete source archive requiring a future Cloudflare backend migration, not a direct static Pages upload.
+- [x] Include concise Cloudflare deployment guidance that accurately states the app’s server/database requirements and required environment configuration.

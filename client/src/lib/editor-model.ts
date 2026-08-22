@@ -284,6 +284,41 @@ export function classifyFile(file: Pick<File, "type">): AssetKind {
   return "unknown";
 }
 
+export function needsAudioRightsConfirmation(files: ReadonlyArray<Pick<File, "type">>, rightsConfirmed: boolean): boolean {
+  return !rightsConfirmed && files.some(file => classifyFile(file) === "audio");
+}
+
+export function preferredVoiceOverMimeType(isSupported: (type: string) => boolean): string | undefined {
+  return ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"].find(isSupported);
+}
+
+export function getVoiceOverUnavailableMessage(options: { hasGetUserMedia: boolean; hasMediaRecorder: boolean }): string | null {
+  if (!options.hasGetUserMedia || !options.hasMediaRecorder) return "Voice-over recording is not supported by this browser. Import an original or licensed audio file instead.";
+  return null;
+}
+
+export function getVoiceOverStartErrorMessage(errorName?: string): string {
+  return errorName === "NotAllowedError" ? "Microphone permission was not granted." : "Voice-over recording could not start.";
+}
+
+export function shouldKeepVoiceOverRecording(options: { discard: boolean; chunkCount: number }): boolean {
+  return !options.discard && options.chunkCount > 0;
+}
+
+export function getLocalWorkspaceStatus(project: Pick<EditorProject, "clips" | "tracks">) {
+  const clipCount = project.clips.length;
+  const trackCount = project.tracks.length;
+  return {
+    label: "Local" as const,
+    detail: `${clipCount} ${clipCount === 1 ? "clip" : "clips"}`,
+    ariaLabel: `${clipCount} ${clipCount === 1 ? "clip" : "clips"} · ${trackCount} ${trackCount === 1 ? "track" : "tracks"} · browser-local`,
+  };
+}
+
+export function isWorkspacePanelActive<T extends string>(activePanel: T, panel: T): boolean {
+  return activePanel === panel;
+}
+
 export function createClip(asset: EditorAsset, trackId: string, start: number, overrides: Partial<TimelineClip> = {}): TimelineClip {
   return {
     id: crypto.randomUUID(),
