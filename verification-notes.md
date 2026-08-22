@@ -1,5 +1,9 @@
 # REVRSE EDITOR Verification Notes
 
+- **2026-08-22 — Cloudflare Workers migration package:** Added an isolated `cloudflare/` Worker source package without replacing the Node/Express release. `pnpm cf:check` passed, `pnpm cf:build` produced the Static Assets bundle, and the complete Vitest suite passed **36 tests across 9 files**.
+- **2026-08-22 — Local Worker smoke test:** The Worker served the root route and an arbitrary SPA route with HTTP 200. With no D1/R2/Access bindings present locally, `/api/projects` returned an explicit HTTP 503 configuration response. This verifies the safe failure path: local editor assets can load, but account/community persistence is not silently emulated or made public.
+- **2026-08-22 — Cloudflare security boundary:** The Worker source validates signed Cloudflare Access JWTs against the configured team JWKS, issuer, audience, expiry, and server-only owner email before granting account or moderation actions. Its D1 migration stores metadata/project JSON only; binary shared media is accepted only after rights attestation and is written to R2. No Cloudflare resource, D1 migration, R2 bucket, Worker secret, domain, or deployment has been created or changed during this source-validation phase.
+
 - **2026-08-22:** The dashboard rendered at the managed preview URL with REVRSE EDITOR branding, canvas starters, local recent projects, original editable templates, privacy guidance, and explicit account-sync fallback messaging.
 - **2026-08-22:** The original editable motion-study workspace opened successfully. The preview, media bin, transform inspector, multitrack timeline, command controls, local autosave indicator, import/export controls, and optional **Save copy** action were visible and interactive.
 - **Constraint confirmed:** No audio import, playback, or audio timeline control is present in the editor workflow.

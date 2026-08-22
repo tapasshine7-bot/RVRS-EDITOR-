@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["cloudflare/**/*.ts", "client/src/**/*.ts", "client/src/**/*.tsx", "shared/**/*"],
+  "exclude": ["node_modules", "build", "dist", "server/**/*", "**/*.test.ts"],
+  "compilerOptions": {
+    "types": ["@cloudflare/workers-types", "vite/client"],
+    "noEmit": true
+  }
+}

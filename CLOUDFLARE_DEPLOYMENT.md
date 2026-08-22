@@ -1,25 +1,57 @@
-# Cloudflare deployment note
+# Deploy REVRSE EDITOR on Cloudflare Workers
 
-This archive is a **complete source archive**, not a direct Cloudflare Pages upload. It contains the REVRSE EDITOR frontend, the Express/tRPC backend, Drizzle schema and migrations, and the lockfile required to reproduce the build. It deliberately excludes `.env` files, `node_modules`, build output, logs, and Git metadata.
+## What this version is
 
-## Why a direct Cloudflare Pages upload will not work
+This repository now contains a **separate Cloudflare Workers version** under `cloudflare/`. It preserves the existing REVRSE EDITOR interface and browser-local editing behavior, but uses Workers Static Assets, D1 metadata, Cloudflare Access identity, and R2 for any approved shared-media files. The original Node/Express, MySQL/TiDB, Manus OAuth, and Manus storage release is still present and unchanged.
 
-The project starts a Node/Express server with `pnpm start` and uses MySQL-compatible database access, OAuth, S3-compatible storage, and server-side tRPC endpoints. Cloudflare Pages is a static hosting service, so it cannot run the current Express server or `/api/trpc` backend as-is. The repository does not include `wrangler.toml`, a Pages Functions directory, or a Worker entry point.
+> Do **not** upload the old source ZIP directly to Cloudflare Pages. The `rvrdeditor.pages.dev` project previously had no completed application build, which is why it returned a 404. Use the Workers path below after completing the required Cloudflare setup.
 
-## Supported deployment choices
+## One-time Cloudflare setup
 
-| Choice | Status | What is needed |
+| Step | What to create or configure | Why it is needed |
 |---|---|---|
-| Manus built-in hosting | Compatible with the current project | Publish the saved project version from the Manus interface. |
-| Node-compatible host | Compatible after environment configuration | Install dependencies with `pnpm install --frozen-lockfile`, build with `pnpm build`, run with `pnpm start`, and configure the database, OAuth, storage, and JWT environment variables. |
-| Cloudflare Workers or Pages | Requires a future migration | Replace/adapt the Express runtime and server routes for Workers, configure a compatible database strategy, move secrets into Cloudflare, and update OAuth callback URLs. Do not upload this ZIP to Pages and expect the authenticated API or database features to work. |
+| 1 | Enable **R2** for the Cloudflare account. | Shared creator video/audio must use object storage; bytes are never stored in D1. |
+| 2 | Create a new D1 database named `revrse-editor`. | It holds account project structure, template metadata, favourites, authentic reviews, and private reports. |
+| 3 | Create a new R2 bucket named `revrse-editor-media`. | It holds only rights-attested shared video or sound files. Local imports and voice-over stay in the browser by default. |
+| 4 | Create a Cloudflare Access application for the new Worker domain. | It gives the Worker a verified identity instead of trusting a browser-supplied email or role. Protect the entire Worker site for the simplest secure setup. |
+| 5 | Record the Access team domain, application audience tag, and the owner’s approved sign-in email. | The Worker verifies signed Access JWTs and grants moderation only when the verified email matches `ADMIN_EMAIL`. |
 
-## Before any production deployment
+Do not reuse an unrelated D1 database, R2 bucket, Access application, or Worker. Do not put tokens, Access values, database IDs, or personal credentials in frontend code, GitHub, or a ZIP archive.
 
-1. Install dependencies with the locked package manager version.
-2. Configure production database, OAuth, JWT, storage, and application environment variables securely; never commit or upload `.env` files.
-3. Apply the reviewed Drizzle migrations to the production database.
-4. Set the production OAuth callback URL for the selected host.
-5. Run `pnpm check` and `pnpm test`, then validate sign-in, local-first editing, export preparation, creator reporting, and audio/voice-over permissions in the production-like environment.
+## Deploy in six short steps
 
-> A Cloudflare migration should be treated as a separate engineering task. It must preserve the local-first editor, authorized API routes, database security, and server-only credentials rather than attempting a static-only upload.
+1. Open a terminal in the project folder and run `pnpm install --frozen-lockfile`.
+2. Copy `cloudflare/wrangler.production.jsonc.example` to `cloudflare/wrangler.production.jsonc`.
+3. In the copied file, replace `REPLACE_WITH_D1_DATABASE_ID` with the new D1 database ID. Keep the binding names exactly as shown: `REVRSE_DB` and `REVRSE_MEDIA`.
+4. Add `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`, and `ADMIN_EMAIL` as **Worker secrets or protected variables** in the Cloudflare dashboard. These must not be Vite variables or frontend configuration.
+5. Apply the reviewed schema once: `pnpm exec wrangler d1 migrations apply revrse-editor --remote --config cloudflare/wrangler.production.jsonc`.
+6. Build and deploy: `pnpm cf:build && pnpm exec wrangler deploy --config cloudflare/wrangler.production.jsonc`.
+
+After deployment, use the Worker URL shown by Cloudflare. If you later want a custom domain, attach it in the Worker settings. Do not assume `rvrdeditor.pages.dev` will change until you deliberately replace that Pages deployment or move the desired domain to this Worker.
+
+## Local checks
+
+Run these before any deployment:
+
+```bash
+pnpm check
+pnpm cf:check
+pnpm test
+pnpm cf:build
+pnpm cf:dev
+```
+
+The local Worker intentionally starts without account bindings. In that state, the editor shell and browser-local workflow load, while account sync and community endpoints return a clear **503 configuration** response rather than accepting insecure data. Once Cloudflare Access, D1, and R2 are configured, validate sign-in, browser-local project recovery, project sync, rights-attested publication, private reports, owner-only moderation, and the absence of any third-party music catalogue or standalone downloads.
+
+## Important protections retained
+
+| Area | Worker behavior |
+|---|---|
+| Local media and voice-over | Remain browser-local and are never automatically uploaded. |
+| Cloud project sync | Stores project structure only; restoring a project still requires the user to re-import local media. |
+| Shared creator media | Requires explicit rights attestation, supported file validation, and R2. It cannot fall back to D1 or base64 persistence. |
+| Reviews and reports | Require a verified Cloudflare Access identity. Creators cannot review or report their own shared resources. Reports remain private. |
+| Moderation | Requires the verified Access email to equal the server-only `ADMIN_EMAIL` value. A frontend role cannot grant access. |
+| Music catalogue | Still intentionally disabled. No commercial music copying, Instagram/Reels audio import, or standalone download is enabled. |
+
+For the complete design and data boundary, read [`CLOUDFLARE_MIGRATION_ARCHITECTURE.md`](./CLOUDFLARE_MIGRATION_ARCHITECTURE.md).

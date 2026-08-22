@@ -82,3 +82,11 @@
 - [x] Create and verify one complete deployment-source REVRSE EDITOR ZIP archive, excluding secrets, logs, build output, dependencies, and repository metadata.
 - [x] Verify the delivered ZIP against Cloudflare’s deployment requirements and document that it is a complete source archive requiring a future Cloudflare backend migration, not a direct static Pages upload.
 - [x] Include concise Cloudflare deployment guidance that accurately states the app’s server/database requirements and required environment configuration.
+- [x] Assess the existing REVRSE EDITOR backend, database, authentication, storage, and deployment dependencies for a separate Cloudflare Workers-compatible migration.
+- [x] Design and implement a Cloudflare-compatible deployment version without weakening authorization, data safeguards, or copyright boundaries.
+- [x] Document the isolated Workers architecture, including static SPA routing, D1-only metadata, R2-only lawful shared media, and verified Cloudflare Access identity.
+- [x] Add an isolated Cloudflare build entry, Worker API, D1 migrations, and Wrangler configuration without replacing the existing Express/MySQL runtime.
+- [x] Preserve browser-local media and voice-over defaults, enforce authenticated project/community API authorization, and retain owner-only moderation in the Workers API.
+- [x] Add unit coverage for Worker authorization, role checks, rights-attestation validation, and static API-routing decisions.
+- [x] Build and locally validate the Cloudflare version, update deployment documentation, checkpoint it, and push the safe source version to GitHub.
+- [ ] Save a recovery checkpoint for the Cloudflare migration package and push the safe source version to tapasshine7-bot/RVRS-EDITOR-.
