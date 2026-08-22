@@ -89,4 +89,4 @@
 - [x] Preserve browser-local media and voice-over defaults, enforce authenticated project/community API authorization, and retain owner-only moderation in the Workers API.
 - [x] Add unit coverage for Worker authorization, role checks, rights-attestation validation, and static API-routing decisions.
 - [x] Build and locally validate the Cloudflare version, update deployment documentation, checkpoint it, and push the safe source version to GitHub.
-- [ ] Save a recovery checkpoint for the Cloudflare migration package and push the safe source version to tapasshine7-bot/RVRS-EDITOR-.
+- [x] Save a recovery checkpoint for the Cloudflare migration package and push the safe source version to tapasshine7-bot/RVRS-EDITOR-.
